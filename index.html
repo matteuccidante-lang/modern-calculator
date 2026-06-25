@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calculadora Moderna</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-page: #0f172a;
+      --bg-calc: #1e293b;
+      --bg-display: #0b1220;
+      --btn-primary: #334155;
+      --btn-secondary: #475569;
+      --btn-accent: #f59e0b;
+      --btn-danger: #ef4444;
+      --btn-equals: #10b981;
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      --radius: 20px;
+      --transition: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-page);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      color: var(--text-primary);
+    }
+
+    .calculator {
+      width: 100%;
+      max-width: 400px;
+      background: var(--bg-calc);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .display {
+      background: var(--bg-display);
+      padding: 24px;
+      min-height: 140px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      align-items: flex-end;
+      text-align: right;
+      gap: 8px;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+    }
+
+    .expression {
+      font-size: 1.1rem;
+      font-weight: 400;
+      color: var(--text-secondary);
+      min-height: 1.5em;
+      letter-spacing: 0.5px;
+    }
+
+    .result {
+      font-size: 3rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1.1;
+    }
+
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      padding: 24px;
+    }
+
+    button {
+      border: none;
+      outline: none;
+      font-family: inherit;
+      font-size: 1.4rem;
+      font-weight: 600;
+      border-radius: 14px;
+      padding: 20px;
+      cursor: pointer;
+      background: var(--btn-primary);
+      color: var(--text-primary);
+      transition: transform var(--transition), background var(--transition), box-shadow var(--transition);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    button:hover {
+      background: var(--btn-secondary);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 12px -2px rgba(0, 0, 0, 0.3);
+    }
+
+    button:active {
+      transform: translateY(1px) scale(0.96);
+      box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-accent {
+      background: var(--btn-accent);
+      color: #1a1a1a;
+    }
+
+    .btn-accent:hover {
+      background: #fbbf24;
+    }
+
+    .btn-danger {
+      background: var(--btn-danger);
+      color: #fff;
+    }
+
+    .btn-danger:hover {
+      background: #f87171;
+    }
+
+    .btn-equals {
+      background: var(--btn-equals);
+      color: #fff;
+      grid-column: span 2;
+    }
+
+    .btn-equals:hover {
+      background: #34d399;
+    }
+
+    .btn-zero {
+      grid-column: span 2;
+    }
+
+    .btn-operator {
+      font-size: 1.6rem;
+    }
+
+    .footer {
+      text-align: center;
+      padding: 0 24px 16px;
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      letter-spacing: 0.5px;
+    }
+
+    @media (max-width: 480px) {
+      .calculator {
+        max-width: 100%;
+        border-radius: 16px;
+      }
+
+      .display {
+        padding: 20px;
+        min-height: 120px;
+      }
+
+      .result {
+        font-size: 2.5rem;
+      }
+
+      .buttons {
+        padding: 16px;
+        gap: 10px;
+      }
+
+      button {
+        padding: 18px;
+        font-size: 1.25rem;
+        border-radius: 12px;
+      }
+    }
+
+    @media (max-width: 360px) {
+      button {
+        padding: 16px;
+        font-size: 1.1rem;
+      }
+
+      .result {
+        font-size: 2rem;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      button {
+        transition: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="calculator" aria-label="Calculadora">
+    <div class="display" aria-live="polite">
+      <div class="expression" id="expression">0</div>
+      <div class="result" id="result">0</div>
+    </div>
+
+    <div class="buttons" role="grid">
+      <button class="btn-danger" onclick="clearAll()" aria-label="Limpar">C</button>
+      <button class="btn-accent" onclick="backspace()" aria-label="Apagar">←</button>
+      <button class="btn-accent" onclick="toggleSign()" aria-label="Mais ou menos">±</button>
+      <button class="btn-accent btn-operator" onclick="appendOperator('/')" aria-label="Dividir">÷</button>
+
+      <button onclick="appendNumber('7')" aria-label="7">7</button>
+      <button onclick="appendNumber('8')" aria-label="8">8</button>
+      <button onclick="appendNumber('9')" aria-label="9">9</button>
+      <button class="btn-accent btn-operator" onclick="appendOperator('*')" aria-label="Multiplicar">×</button>
+
+      <button onclick="appendNumber('4')" aria-label="4">4</button>
+      <button onclick="appendNumber('5')" aria-label="5">5</button>
+      <button onclick="appendNumber('6')" aria-label="6">6</button>
+      <button class="btn-accent btn-operator" onclick="appendOperator('-')" aria-label="Subtrair">−</button>
+
+      <button onclick="appendNumber('1')" aria-label="1">1</button>
+      <button onclick="appendNumber('2')" aria-label="2">2</button>
+      <button onclick="appendNumber('3')" aria-label="3">3</button>
+      <button class="btn-accent btn-operator" onclick="appendOperator('+')" aria-label="Somar">+</button>
+
+      <button class="btn-zero" onclick="appendNumber('0')" aria-label="0">0</button>
+      <button onclick="appendNumber('.')" aria-label="Ponto">.</button>
+      <button class="btn-accent btn-operator" onclick="percentage()" aria-label="Porcentagem">%</button>
+
+      <button class="btn-equals" onclick="calculate()" aria-label="Calcular">=</button>
+    </div>
+
+    <div class="footer">Calculadora Moderna &bull; HTML + CSS + JS</div>
+  </main>
+
+  <script>
+    const expressionEl = document.getElementById('expression');
+    const resultEl = document.getElementById('result');
+
+    let currentExpression = '0';
+    let shouldResetOnNext = false;
+    let lastWasOperator = false;
+
+    function updateDisplay() {
+      const displayExpr = currentExpression
+        .replace(/\*/g, '×')
+        .replace(/\//g, '÷')
+        .replace(/-/g, '−');
+      expressionEl.textContent = displayExpr || '0';
+
+      try {
+        const sanitized = currentExpression.replace(/[^0-9+\-*/.]/g, '');
+        if (!sanitized || sanitized === '0' || /^[\+\-\*/\.]+$/.test(sanitized)) {
+          resultEl.textContent = '0';
+        } else {
+          const evalResult = Function('"use strict"; return (' + sanitized + ')')();
+          resultEl.textContent = formatNumber(evalResult);
+        }
+      } catch {
+        resultEl.textContent = '0';
+      }
+    }
+
+    function formatNumber(value) {
+      if (!isFinite(value)) return 'Erro';
+      if (Number.isInteger(value)) return value.toString();
+      const fixed = parseFloat(value.toFixed(8));
+      return fixed.toString().replace('.', ',');
+    }
+
+    function appendNumber(num) {
+      if (shouldResetOnNext) {
+        currentExpression = '0';
+        shouldResetOnNext = false;
+      }
+
+      if (currentExpression === '0' && num !== '.') {
+        currentExpression = num;
+      } else if (num === '.') {
+        const tokens = currentExpression.split(/[\+\-\*/]/);
+        const lastToken = tokens[tokens.length - 1];
+        if (!lastToken.includes('.')) {
+          currentExpression += num;
+        }
+      } else {
+        currentExpression += num;
+      }
+
+      lastWasOperator = false;
+      updateDisplay();
+    }
+
+    function appendOperator(op) {
+      if (shouldResetOnNext) {
+        shouldResetOnNext = false;
+      }
+
+      if (currentExpression === '0') {
+        if (op === '-') {
+          currentExpression = '-';
+          lastWasOperator = false;
+          updateDisplay();
+          return;
+        }
+        if (op === '+') return;
+      }
+
+      if (lastWasOperator) {
+        currentExpression = currentExpression.slice(0, -1) + op;
+      } else {
+        currentExpression += op;
+      }
+
+      lastWasOperator = true;
+      updateDisplay();
+    }
+
+    function backspace() {
+      if (shouldResetOnNext) {
+        clearAll();
+        return;
+      }
+
+      if (currentExpression.length === 1) {
+        currentExpression = '0';
+      } else {
+        currentExpression = currentExpression.slice(0, -1);
+      }
+
+      const lastChar = currentExpression.slice(-1);
+      lastWasOperator = /[\+\-\*/]/.test(lastChar);
+      updateDisplay();
+    }
+
+    function clearAll() {
+      currentExpression = '0';
+      shouldResetOnNext = false;
+      lastWasOperator = false;
+      updateDisplay();
+    }
+
+    function toggleSign() {
+      try {
+        const sanitized = currentExpression.replace(/[^0-9+\-*/.]/g, '');
+        if (!sanitized || sanitized === '0') return;
+
+        const result = Function('"use strict"; return (' + sanitized + ')')();
+        if (!isFinite(result)) return;
+
+        const toggled = -result;
+        currentExpression = toggled.toString();
+        shouldResetOnNext = false;
+        lastWasOperator = false;
+        updateDisplay();
+      } catch {
+        resultEl.textContent = 'Erro';
+      }
+    }
+
+    function percentage() {
+      try {
+        const sanitized = currentExpression.replace(/[^0-9+\-*/.]/g, '');
+        if (!sanitized || sanitized === '0') return;
+
+        const result = Function('"use strict"; return (' + sanitized + ')')();
+        if (!isFinite(result)) return;
+
+        currentExpression = (result / 100).toString();
+        shouldResetOnNext = false;
+        lastWasOperator = false;
+        updateDisplay();
+      } catch {
+        resultEl.textContent = 'Erro';
+      }
+    }
+
+    function calculate() {
+      try {
+        const sanitized = currentExpression.replace(/[^0-9+\-*/.]/g, '');
+        if (!sanitized || /^[\+\-\*/\.]+$/.test(sanitized)) {
+          currentExpression = '0';
+          updateDisplay();
+          return;
+        }
+
+        const result = Function('"use strict"; return (' + sanitized + ')')();
+
+        if (!isFinite(result)) {
+          currentExpression = '0';
+          resultEl.textContent = 'Erro';
+          shouldResetOnNext = true;
+          return;
+        }
+
+        currentExpression = result.toString();
+        shouldResetOnNext = true;
+        lastWasOperator = false;
+        updateDisplay();
+      } catch {
+        currentExpression = '0';
+        resultEl.textContent = 'Erro';
+        shouldResetOnNext = true;
+      }
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key >= '0' && e.key <= '9') appendNumber(e.key);
+      if (e.key === '.') appendNumber('.');
+      if (e.key === '+' || e.key === '-' || e.key === '*' || e.key === '/') appendOperator(e.key);
+      if (e.key === 'Enter' || e.key === '=') calculate();
+      if (e.key === 'Backspace') backspace();
+      if (e.key === 'Escape') clearAll();
+      if (e.key === '%') percentage();
+    });
+
+    updateDisplay();
+  </script>
+</body>
+</html>
